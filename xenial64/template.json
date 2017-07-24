@@ -1,0 +1,75 @@
+{
+  "variables": {
+    "user": "alvaro",
+    "name": "xenial64",
+    "build_cpu_cores": "2",
+    "build_memory": "1024",
+    "cpu_cores": "1",
+    "memory": "512",
+    "disk_size": "40960",
+    "headless": "false",
+    "ova_checksum_type": "md5",
+    "ova_checksum": "9545cd38cea2116a6744bc34bb343c92",
+    "ova_url": "https://github.com/kikitux/virtualbox-ovf/releases/download/2017.7/xenial64.ova",
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "version": "{{isotime \"2006.01.02\"}}"
+  },
+  "push": {
+    "name": "{{user `user`}}/{{user `name`}}",
+    "exclude": [
+      ".git",
+      "packer_cache",
+      "output*",
+      "*.box"
+    ]
+  },
+  "builders": [
+    {
+      "name": "{{ user `name` }}-vbox",
+      "vm_name": "{{ user `name` }}",
+      "boot_wait": "5s",
+      "format": "ovf",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "headless": "{{user `headless`}}",
+      "http_directory": "http",
+      "checksum": "{{user `ova_checksum`}}",
+      "checksum_type": "{{user `ova_checksum_type`}}",
+      "source_path": "{{user `ova_url`}}",
+      "shutdown_command": "echo 'vagrant' | sudo -S poweroff",
+      "ssh_password": "{{user `ssh_username`}}",
+      "ssh_username": "{{user `ssh_password`}}",
+      "ssh_wait_timeout": "20m",
+      "type": "virtualbox-ovf",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "{{user `build_memory`}}"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "{{user `build_cpu_cores`}}"
+        ]
+      ],
+      "virtualbox_version_file": ".vbox_version"
+    }
+  ],
+  "provisioners": [
+    {
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
+      "script": "scripts/provision.sh",
+      "type": "shell"
+    }
+  ],
+  "post-processors": [
+    {
+      "compression_level": 1,
+      "keep_input_artifact": true,
+      "type": "vagrant"
+    }
+  ]
+}

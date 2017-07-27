@@ -15,15 +15,6 @@
     "ssh_password": "vagrant",
     "version": "{{isotime \"2006.01.02\"}}"
   },
-  "push": {
-    "name": "{{user `user`}}/{{user `name`}}",
-    "exclude": [
-      ".git",
-      "packer_cache",
-      "output*",
-      "*.box"
-    ]
-  },
   "builders": [
     {
       "name": "{{ user `name` }}-vbox",
